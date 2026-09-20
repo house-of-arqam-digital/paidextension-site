@@ -22,7 +22,11 @@ module.exports = [
         URLSearchParams: 'readonly',
         Paddle: 'readonly',
         fetch: 'readonly',
-        Promise: 'readonly'
+        Promise: 'readonly',
+        TextEncoder: 'readonly',
+        TextDecoder: 'readonly',
+        atob: 'readonly',
+        btoa: 'readonly'
       }
     },
     rules: {
