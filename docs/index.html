@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; img-src 'self' data:; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>PaidExtension — The $0/month stack for paid browser extensions</title>
+  <meta name="description" content="Sell a Chrome, Edge or Firefox extension without servers, a database bill or tax filings. MV3 extension + Cloudflare Worker licensing + Paddle merchant of record + GitHub Pages site. Offline license keys, device seats, trials, refunds. One-time purchase.">
+  <meta property="og:title" content="PaidExtension — The $0/month stack for paid browser extensions">
+  <meta property="og:description" content="MV3 extension + Cloudflare Worker licensing + Paddle (merchant of record) + GitHub Pages. Offline-verifiable license keys, device seats, trials. Own the code, pay once.">
+  <meta property="og:image" content="https://paidextension.dev/icon.png">
+  <meta property="og:url" content="https://paidextension.dev/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://paidextension.dev/">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="assets/base.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/theme.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/"><img src="icon.png" alt="" width="32" height="32">PaidExtension</a>
+      <nav aria-label="Primary">
+        <a href="#inside">What's inside</a>
+        <a href="#how">How it works</a>
+        <a href="#compare">Compare</a>
+        <a href="#pricing">Pricing</a>
+        <a href="docs.html">Docs</a>
+        <a class="buy" href="https://polar.sh/paidextension" rel="noopener">Buy</a>
+        <button id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark mode"><span class="sun">&#9728;</span><span class="moon">&#9790;</span></button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <span class="eyebrow">Chrome &middot; Edge &middot; Firefox &middot; Manifest V3</span>
+        <h1>The <em>$0/month</em> stack for paid browser extensions.</h1>
+        <p class="lede">A complete, production-tested launch kit: MV3 extension with offline-verifiable licensing, a Cloudflare Worker that turns Paddle payments into signed license keys, and a static checkout site. No servers. No database bill. No sales-tax filings.</p>
+        <div class="cta-row">
+          <a class="cta" href="https://polar.sh/paidextension" rel="noopener">Get the kit — $99</a>
+          <a class="cta secondary" href="#inside">See what's inside</a>
+        </div>
+        <p class="note">One-time purchase &middot; lifetime updates &middot; unlimited products &middot; 14-day refund</p>
+      </section>
+
+      <pre class="terminal"><code><span class="comment"># from clone to a rebranded, fully tested paid extension</span>
+git clone &lt;your copy&gt; my-extension &amp;&amp; cd my-extension
+npm run init          <span class="comment"># name, company, prices, seats, trial length</span>
+npm run install:all
+npm run check         <span class="comment"># lint, types, 120+ tests, builds — all green</span></code></pre>
+
+      <div class="stats">
+        <div class="stat"><b>$0</b><span>monthly infrastructure until you have customers</span></div>
+        <div class="stat"><b>0</b><span>tax returns you file — Paddle is the merchant of record</span></div>
+        <div class="stat"><b>~1 hour</b><span>from clone to sandbox purchase, following the setup guide</span></div>
+        <div class="stat"><b>3</b><span>browsers from one codebase: Chrome, Edge, Firefox</span></div>
+      </div>
+
+      <section id="why">
+        <h2>Three things no other extension kit gives you together</h2>
+        <p class="sub">Every other boilerplate is "connect Stripe, add a Firebase project, host a backend". You are then on the hook for hosting bills, uptime and VAT.</p>
+        <div class="grid">
+          <div class="card">
+            <span class="tag">Cost</span>
+            <h3>$0/month, honestly</h3>
+            <p>GitHub Pages hosts the site. Cloudflare Workers + KV run licensing on the free tier (100k requests/day — tens of thousands of users). Paddle only takes a cut of sales. Your fixed cost is a domain.</p>
+          </div>
+          <div class="card">
+            <span class="tag">Tax</span>
+            <h3>Merchant of record built in</h3>
+            <p>Paddle sells to your customer, collects VAT/GST/sales tax worldwide, issues invoices and handles refunds and chargebacks. The kit turns Paddle webhooks into license keys — you never touch a tax form.</p>
+          </div>
+          <div class="card">
+            <span class="tag">Reliability</span>
+            <h3>Pro works when your server doesn't</h3>
+            <p>License keys are ES256-signed JWTs verified inside the extension with an embedded public key. No "ask the server if the user is Pro" — and no one-star reviews when a backend hiccups.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="inside">
+        <h2>What's inside</h2>
+        <p class="sub">One private repository, five packages, one config file. Everything reads from <code>paidextension.config.json</code>.</p>
+        <div class="grid">
+          <div class="card">
+            <span class="tag">extension/</span>
+            <h3>TypeScript MV3 extension</h3>
+            <ul>
+              <li>Popup, settings, upgrade flow, sample content script</li>
+              <li><code>licensing/</code> module: offline key verification, device seats, trials, checkout polling, offline grace</li>
+              <li>Config-driven feature gates — <code>isEnabled('export')</code></li>
+              <li>Firefox manifest variant, Edge-ready packaging</li>
+              <li>Vitest suite, ESLint, strict TypeScript, webpack</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="tag">worker/</span>
+            <h3>Cloudflare Worker licensing backend</h3>
+            <ul>
+              <li>Verifies Paddle webhooks, issues signed keys for monthly, yearly and <strong>lifetime</strong> plans</li>
+              <li>Seat registry in KV, short-lived install-bound entitlement tokens</li>
+              <li>Revokes on refund, chargeback and cancellation</li>
+              <li>Abuse-limited free trials, per-route rate limits</li>
+              <li>License-key emails via Resend, idempotent on retries</li>
+              <li>65 tests, no framework, deploys with <code>wrangler deploy</code></li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="tag">site/</span>
+            <h3>Static checkout &amp; customer site</h3>
+            <ul>
+              <li>Landing, Paddle overlay checkout, license-key page, device management</li>
+              <li>Privacy, terms, support pages with refund policy</li>
+              <li>Strict per-page CSP, HTML validation, link and CSP checkers</li>
+              <li>Deploys to GitHub Pages on push</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="tag">scripts/</span>
+            <h3>Rebrand, validate, generate</h3>
+            <ul>
+              <li><code>npm run init</code> rewrites the entire repo for your product from a few answers</li>
+              <li><code>validate:config</code> keeps manifests, Worker and site consistent</li>
+              <li><code>generate:listing</code> drafts store copy, permission justifications and a privacy policy</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="tag">.agents/skills/</span>
+            <h3>Agent-native</h3>
+            <ul>
+              <li>Step-by-step skills for Devin, Claude Code, Cursor and Codex: <strong>setup</strong>, <strong>publish</strong>, <strong>test</strong></li>
+              <li><code>AGENTS.md</code> with the invariants an agent must not break</li>
+              <li>Hand the repo to your agent: "rename to X, set prices, deploy, submit"</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="tag">.github/workflows/</span>
+            <h3>CI and releases</h3>
+            <ul>
+              <li>CI for every package on every PR</li>
+              <li>Tag-triggered release: version check, production build, store zips, GitHub release</li>
+              <li>Pages deploy for the site, Wrangler deploy for the Worker</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="how">
+        <h2>How licensing works</h2>
+        <p class="sub">Keys are portable, offline-verifiable and revocable — the three things that are hard to get at once.</p>
+        <div class="flow">
+          <div class="card"><span class="where">Extension</span><h3>1. Checkout</h3><p><code>POST /checkout {plan}</code> creates a Paddle transaction; the extension opens your checkout page with the overlay.</p></div>
+          <div class="card"><span class="where">Paddle → Worker</span><h3>2. Webhook</h3><p><code>transaction.completed</code> is signature-checked, the Worker signs an ES256 key <code>{sub, plan, exp}</code> and emails it.</p></div>
+          <div class="card"><span class="where">Extension</span><h3>3. Activate</h3><p>Polls <code>GET /license?txn=</code>, then <code>POST /activate</code> claims a seat and gets an install-bound entitlement token.</p></div>
+          <div class="card"><span class="where">Offline</span><h3>4. Verify</h3><p>Key and token verify locally with the embedded public key. Tokens renew every 3 days, so refunds reach the device within days.</p></div>
+        </div>
+        <div class="grid stack">
+          <div class="card"><h3>Plans</h3><p>Monthly and yearly subscriptions key off the Paddle subscription id; lifetime purchases key off the transaction id. Unknown prices are rejected, never silently mapped to a plan.</p></div>
+          <div class="card"><h3>Seats</h3><p>A key activates on up to <code>maxSeats</code> browsers. Users release devices from the extension settings or the devices page, using the key itself as the credential.</p></div>
+          <div class="card"><h3>Trials</h3><p><code>POST /trial</code> issues a time-boxed key per visitor id with per-IP limits. Set <code>trialDays: 0</code> to turn trials off entirely.</p></div>
+        </div>
+      </section>
+
+      <section id="proof">
+        <h2>Extracted from a real product, not a demo</h2>
+        <p class="sub">PaidExtension is the exact stack behind <a href="https://manilamail.app" rel="noopener">Manila Mail Manager</a>, a paid Gmail extension <a href="https://chromewebstore.google.com/detail/eapejkmfejkjkfjimeecbdpkhmkgeipl" rel="noopener">live on the Chrome Web Store</a> — Paddle checkout, Cloudflare licensing, seat limits, trials and refunds have all been exercised by paying customers. The kit is the generic version, with lifetime plans, Edge/Firefox packaging and the agent skills added.</p>
+      </section>
+
+      <section id="compare">
+        <h2>How it compares</h2>
+        <p class="sub">Against the popular extension boilerplates and the hosted "payments SDK" services.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th class="us">PaidExtension</th>
+                <th>Typical boilerplate<br><small>(ExtensionFast, extFast, TurboStarter&hellip;)</small></th>
+                <th>Hosted payment SDKs<br><small>(ExtensionPay, crxpay&hellip;)</small></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Price</td><td class="us">$99 once</td><td>$99–$499 once</td><td>3–5% of every sale, forever</td></tr>
+              <tr><td>Monthly infra at 0 customers</td><td class="us yes">$0</td><td class="no">Firebase / Supabase / hosting tiers</td><td class="yes">$0</td></tr>
+              <tr><td>Sales tax / VAT handled</td><td class="us yes">Yes — Paddle MoR</td><td class="no">No — Stripe, you file</td><td class="no">No — Stripe, you file</td></tr>
+              <tr><td>Works when backend is down</td><td class="us yes">Yes — offline ES256 keys</td><td class="no">No</td><td class="no">No</td></tr>
+              <tr><td>Device seat limits</td><td class="us yes">Yes, self-serve release</td><td class="no">No</td><td class="no">No</td></tr>
+              <tr><td>Lifetime + subscription plans</td><td class="us yes">Both</td><td>Usually subscription</td><td>Both</td></tr>
+              <tr><td>User accounts required</td><td class="us yes">No — key-based</td><td class="no">Google / email auth</td><td class="yes">No</td></tr>
+              <tr><td>Refund / chargeback revocation</td><td class="us yes">Automatic</td><td class="no">DIY</td><td class="yes">Yes</td></tr>
+              <tr><td>Own the code, no vendor</td><td class="us yes">Yes</td><td class="yes">Yes</td><td class="no">No — hosted dependency</td></tr>
+              <tr><td>AI-agent setup/publish/test skills</td><td class="us yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+              <tr><td>Firefox + Edge packaging</td><td class="us yes">Yes</td><td>Sometimes</td><td>Chrome-first</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="tiny">Competitor details as published on their sites at the time of writing; check current terms before deciding.</p>
+      </section>
+
+      <section id="pricing">
+        <h2>Pricing</h2>
+        <p class="sub">Pay once. Build as many extensions as you like.</p>
+        <div class="plans">
+          <div class="card plan">
+            <span class="badge">Launch price</span>
+            <h3>PaidExtension Kit</h3>
+            <p class="price"><s>$149</s>$99</p>
+            <p class="period">one-time, per developer</p>
+            <ul>
+              <li>Private GitHub repo access, instantly</li>
+              <li>Unlimited end products, commercial use</li>
+              <li>Lifetime updates</li>
+              <li>Setup, licensing and publishing guides</li>
+              <li>Agent skills: setup, publish, test</li>
+              <li>Support via GitHub Issues and email</li>
+            </ul>
+            <a class="cta" href="https://polar.sh/paidextension" rel="noopener">Buy the kit</a>
+          </div>
+          <div class="card plan">
+            <h3>Done-for-you setup</h3>
+            <p class="price">$399</p>
+            <p class="period">one-time, includes the kit</p>
+            <ul>
+              <li>We rebrand the kit for your product</li>
+              <li>Create your Paddle products and webhook</li>
+              <li>Deploy the licensing Worker to your Cloudflare</li>
+              <li>Publish your site to GitHub Pages on your domain</li>
+              <li>Verify trial → purchase → activate in sandbox</li>
+              <li>Store-listing draft and privacy policy</li>
+            </ul>
+            <a class="cta secondary" href="mailto:hello@paidextension.dev?subject=PaidExtension%20setup%20service">Email to book</a>
+          </div>
+        </div>
+        <p class="guarantee">14-day refund if it's not what you expected. Payments handled by Polar (merchant of record); you'll get a proper invoice.</p>
+      </section>
+
+      <section id="faq" class="faq">
+        <h2>Questions</h2>
+        <details>
+          <summary>What exactly do I receive?</summary>
+          <p>Access to a private GitHub repository containing the full source: <code>extension/</code>, <code>worker/</code>, <code>site/</code>, <code>scripts/</code>, <code>docs/</code>, <code>.agents/skills/</code> and the GitHub Actions workflows. Polar grants the repo access to your GitHub account right after purchase; updates arrive as commits.</p>
+        </details>
+        <details>
+          <summary>Do I need to know Cloudflare or Paddle already?</summary>
+          <p>No. The setup guide (and the <code>setup</code> agent skill) walks through creating the Paddle prices and webhook, deploying the Worker and pointing your domain at GitHub Pages. Budget about an hour for a first run.</p>
+        </details>
+        <details>
+          <summary>Why Paddle rather than Stripe?</summary>
+          <p>Paddle is a merchant of record: it is legally the seller, so it collects and remits sales tax in every jurisdiction and handles invoices, refunds and chargebacks. With Stripe those obligations are yours. For a solo developer selling globally that difference is the whole ballgame.</p>
+        </details>
+        <details>
+          <summary>Is it really $0/month?</summary>
+          <p>Until you outgrow the free tiers, yes: GitHub Pages is free, Cloudflare Workers gives 100,000 requests/day and KV 1,000 writes/day, Resend gives 3,000 emails/month. Paddle charges 5% + 50¢ per sale and nothing otherwise. You pay for a domain (~$12/year).</p>
+        </details>
+        <details>
+          <summary>Can I use React / WXT / Plasmo?</summary>
+          <p>The extension scaffold is plain TypeScript + webpack so there's nothing to fight. The <code>licensing/</code> module has no UI dependencies and drops into any MV3 project; the Worker and site are independent of the extension framework.</p>
+        </details>
+        <details>
+          <summary>What does the license allow?</summary>
+          <p>One developer, unlimited commercial end products, forever, including all updates. You may not redistribute the kit itself or use it to build a competing kit. Each developer who edits the kit's files needs their own license. Full text on the <a href="license.html">license page</a>.</p>
+        </details>
+        <details>
+          <summary>How is this "agent-native"?</summary>
+          <p>The repo ships an <code>AGENTS.md</code> plus three skills in <code>.agents/skills/</code> — setup, publish and test — written as checklists an AI coding agent can execute. They encode the things that usually go wrong: service-worker constraints, CSP rules, Paddle sandbox quirks, store-review requirements.</p>
+        </details>
+        <details>
+          <summary>Refunds?</summary>
+          <p>14 days, no questions asked — email <a href="mailto:hello@paidextension.dev">hello@paidextension.dev</a>. We'll revoke repo access and refund through Polar.</p>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <div>&copy; 2026 House of Arqam Ventures LLC. Not affiliated with Google, Microsoft, Mozilla, Paddle or Cloudflare.</div>
+      <div>
+        <a href="docs.html">Docs</a>
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="mailto:hello@paidextension.dev">hello@paidextension.dev</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
