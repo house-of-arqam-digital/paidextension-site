@@ -50,6 +50,11 @@ docs/                       setup, licensing, publishing guides
 .github/workflows/          ci.yml, pages.yml, release.yml</code></pre>
 
       <h2 id="setup">The setup path (about an hour)</h2>
+<pre class="terminal"><code># from clone to a rebranded, fully tested paid extension
+git clone &lt;your copy&gt; my-extension &amp;&amp; cd my-extension
+npm run init          # name, company, prices, seats, trial length
+npm run install:all
+npm run check         # lint, types, 120+ tests, builds — all green</code></pre>
       <ol>
         <li><strong>Rebrand.</strong> <code>npm run init</code> asks for product name, company, support email, site URL, seats and trial days, then rewrites the config and every file mirroring it: manifests, <code>wrangler.toml</code>, the site's HTML and CSP, <code>CNAME</code>, tests. Non-interactive mode for agents: <code>npm run init -- --from answers.json</code>.</li>
         <li><strong>Signing keypair.</strong> <code>cd worker &amp;&amp; npm run keygen -- --write</code> generates an ES256 keypair, writes the public half into the extension and prints the private half for the Worker secret. Production builds refuse to ship while the development key is still in place.</li>
