@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PaidExtension social card</title>
+  <style>
+    :root {
+      --paper: #0F1117;
+      --ink: #F1F2F7;
+      --muted: #A7ADBF;
+      --accent: #818CF8;
+      --green: #22C55E;
+      --kraft: #262A38;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 1200px; height: 630px; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Liberation Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      position: relative;
+    }
+    .glow {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(720px 420px at 88% 8%, rgba(79, 70, 229, 0.42), transparent 70%),
+        radial-gradient(520px 320px at 6% 100%, rgba(34, 197, 94, 0.14), transparent 70%);
+    }
+    .grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--kraft) 1px, transparent 1px),
+        linear-gradient(90deg, var(--kraft) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.35;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 85%);
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 85%);
+    }
+    .card {
+      position: relative;
+      height: 100%;
+      padding: 64px 72px 56px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: 20px; }
+    .brand svg { width: 68px; height: 68px; }
+    .brand span { font-size: 34px; font-weight: 700; letter-spacing: -0.01em; }
+    h1 {
+      font-size: 74px; line-height: 1.04; font-weight: 800; letter-spacing: -0.03em;
+      max-width: 1000px;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+    .stack {
+      margin-top: 28px;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 20px; color: var(--ink); white-space: nowrap; letter-spacing: -0.01em;
+    }
+    .stack b { color: var(--accent); }
+    .foot {
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--kraft); padding-top: 24px;
+      font-size: 24px; color: var(--muted);
+    }
+    .foot .pills { display: flex; gap: 12px; }
+    .pill {
+      border: 1px solid var(--kraft); border-radius: 999px; padding: 6px 16px;
+      font-size: 20px; color: var(--ink); background: rgba(255,255,255,0.03);
+    }
+    .pill.ok { color: var(--green); border-color: rgba(34,197,94,0.4); }
+    .foot .url { color: var(--ink); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="grid"></div>
+  <div class="card">
+    <div class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-hidden="true">
+        <rect width="128" height="128" rx="28" fill="#4F46E5"/>
+        <path d="M40 88V40h22a16 16 0 0 1 0 32H52v16z" fill="none" stroke="#fff" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="90" cy="84" r="12" fill="#22C55E"/>
+        <path d="M84 84l4 4 8-8" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>PaidExtension</span>
+    </div>
+    <div>
+      <h1>The <em>$0/month</em> stack for paid browser extensions.</h1>
+      <p class="stack">MV3 extension <b>·</b> Cloudflare Worker licensing <b>·</b> Paddle (merchant of record) <b>·</b> GitHub Pages</p>
+    </div>
+    <div class="foot">
+      <div class="pills">
+        <span class="pill">Offline license keys</span>
+        <span class="pill">Device seats &amp; trials</span>
+        <span class="pill ok">Own the code · pay once</span>
+      </div>
+      <span class="url">paidextension.dev</span>
+    </div>
+  </div>
+</body>
+</html>
