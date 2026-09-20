@@ -70,19 +70,28 @@
                 <li data-feature="unlimitedItems">Unlimited items</li>
               </ul>
               <div class="popup-actions">
-                <button type="button" class="primary" data-action="trial" data-needs="free">Start 7-day trial</button>
-                <button type="button" class="primary" data-action="buy" data-plan-id="lifetime" data-needs="free">Buy lifetime (sandbox)</button>
-                <button type="button" data-action="seats" data-needs="key">Add 3 more devices</button>
-                <button type="button" data-action="tamper" data-needs="key">Tamper with token</button>
-                <button type="button" data-action="offline">Toggle Worker outage</button>
-                <button type="button" data-action="refund" data-needs="key">Refund</button>
-                <button type="button" data-action="reset">Reset</button>
+                <button type="button" class="primary" data-action="trial" data-needs="free" title="Worker signs a 7-day trial key; the extension activates and verifies it">Start 7-day trial</button>
+                <button type="button" class="primary" data-action="buy" data-plan-id="lifetime" data-needs="notpro" title="Simulated Paddle purchase → webhook → signed lifetime key">Buy lifetime (sandbox)</button>
+                <button type="button" data-action="seats" data-needs="paid" title="Activate the same key on three more browsers; the 4th hits the seat limit">Add 3 more devices</button>
+                <button type="button" data-action="refund" data-needs="key" title="Simulated Paddle refund webhook → license revoked at next renewal">Refund</button>
+                <button type="button" data-action="reset" title="Wipe the fake extension's storage and start over">Reset</button>
               </div>
+              <details class="popup-edge">
+                <summary>Edge cases: tampering &amp; outages</summary>
+                <div class="popup-actions">
+                  <button type="button" data-action="tamper" data-needs="key" title="Edit the token payload to claim a lifetime plan; the signature check rejects it">Tamper with token</button>
+                  <button type="button" data-action="offline" title="Make the Worker unreachable; offline verification keeps a valid license working">Toggle Worker outage</button>
+                </div>
+              </details>
               <div class="popup-meta">
                 <span title="Stored key / entitlement token" data-key>&mdash;</span>
                 <span data-seats>&mdash;</span>
                 <span data-server>Worker: online</span>
               </div>
+            </div>
+            <div class="demo-guide" data-guide aria-live="polite">
+              <b data-guide-step>Step 1 of 5 · Fresh install</b>
+              <span data-guide-text>This is the popup of an extension built with the kit. <em>Start 7-day trial</em>: the Worker signs a 7-day trial key and the extension verifies it with only the public key.</span>
             </div>
             <div class="demo-log" role="log" data-log aria-live="polite" aria-label="Licensing event log"></div>
             <p class="demo-note">Live demo: real ES256 keys signed and verified in your browser with a keypair generated for this page. Nothing leaves the tab.</p>

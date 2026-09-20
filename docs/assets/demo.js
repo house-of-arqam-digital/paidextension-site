@@ -22,7 +22,10 @@
     log: $('[data-log]'),
     features: root.querySelectorAll('[data-feature]'),
     buttons: root.querySelectorAll('[data-action]'),
-    server: $('[data-server]')
+    server: $('[data-server]'),
+    edge: $('.popup-edge'),
+    guideStep: $('[data-guide-step]'),
+    guideText: $('[data-guide-text]')
   };
 
   // ---- "Worker" state -----------------------------------------------------
@@ -34,6 +37,7 @@
   var installId = 'install_' + randomId(6);
   var storedKey = null;
   var storedToken = null;
+  var lastEvent = 'start'; // drives the walkthrough copy
 
   function randomId(n) {
     var bytes = new Uint8Array(n);
@@ -91,11 +95,13 @@
 
   // ---- Worker routes --------------------------------------------------------
   function routeTrial() {
+    if (!serverUp) return Promise.reject({ error: 'network' });
     var sub = 'trial_' + randomId(8);
     licenses[sub] = { plan: 'trial', status: 'active', installs: [] };
     return sign({ sub: sub, plan: 'trial', iss: ISSUER, iat: now(), exp: now() + TRIAL_DAYS * 86400 });
   }
   function routeWebhook(plan) {
+    if (!serverUp) return Promise.reject({ error: 'network' });
     var sub = (plan === 'lifetime' ? 'txn_' : 'sub_') + randomId(10);
     licenses[sub] = { plan: plan, status: 'active', installs: [] };
     var days = plan === 'monthly' ? 31 : plan === 'yearly' ? 366 : 36500;
@@ -175,7 +181,74 @@
     for (var j = 0; j < el.buttons.length; j++) {
       var b = el.buttons[j];
       var needs = b.getAttribute('data-needs');
-      b.disabled = needs === 'key' ? !storedKey : needs === 'free' ? !!storedKey : false;
+      b.disabled = needs === 'key' ? !storedKey
+        : needs === 'free' ? !!storedKey
+          : needs === 'notpro' ? tier === 'pro'
+            : needs === 'paid' ? tier !== 'pro'
+              : false;
+    }
+    guide(tier, seats);
+  }
+
+  // Walkthrough: one sentence on what just happened and which button to press
+  // next. Steps 1-5 are the happy path; edge cases get their own copy.
+  function guide(tier, seats) {
+    var step = '';
+    var text = '';
+    var next = null;
+    var em = null;
+    if (!serverUp) {
+      step = 'Worker down';
+      text = tier === 'free'
+        ? 'No license is stored, so there is nothing to keep alive: a fresh install stays Free until the Worker is reachable again. Toggle the outage off to continue.'
+        : 'Renewal failed, but the extension verifies the stored token with the embedded public key — no server call needed — so ' + (tier === 'pro' ? 'Pro' : 'the trial') + ' stays on until the token expires in ' + ENTITLEMENT_DAYS + ' days. Toggle the outage off to renew.';
+      next = 'offline';
+    } else if (lastEvent === 'tamper') {
+      step = 'Tamper rejected';
+      text = 'The payload said "lifetime", but one changed byte broke the ES256 signature, so the extension treated the token as invalid and cleared it. No cached flag to flip — the entitlement is the signed token or nothing.';
+      next = 'reset'; em = 'Reset';
+    } else if (lastEvent === 'refund') {
+      step = 'Step 5 of 5 · Revoked';
+      text = 'Paddle\u2019s refund webhook flipped the license to cancelled. At the next entitlement renewal /activate answered 403, the extension cleared the key and every Pro gate closed — no kill switch, no support ticket. Reset to replay, or open Edge cases.';
+      next = 'reset'; em = 'Reset';
+    } else if (tier === 'free') {
+      step = 'Step 1 of 5 · Fresh install';
+      text = 'This is the popup of an extension built with the kit. Start 7-day trial: the Worker signs a 7-day trial key and the extension verifies it with only the public key.';
+      next = 'trial'; em = 'Start 7-day trial';
+    } else if (tier === 'trial') {
+      step = 'Step 2 of 5 · Trial';
+      text = 'The signature checked out offline and the Worker issued an install-bound entitlement token, so Pro features are on without using a paid seat. Next, Buy lifetime (sandbox): a Paddle purchase becomes a signed lifetime key via webhook.';
+      next = 'buy'; em = 'Buy lifetime (sandbox)';
+    } else if (seats && seats.used >= seats.max) {
+      step = 'Step 4 of 5 · Seat limit';
+      text = 'The fourth browser got 409 seat_limit; the extension tells the user to release a device instead of failing silently. Next, Refund the purchase to see revocation.';
+      next = 'refund'; em = 'Refund';
+    } else {
+      step = 'Step 3 of 5 · Pro';
+      text = 'Paddle\u2019s webhook made the Worker sign a lifetime key (emailed to the buyer); this install took seat ' + (seats ? seats.used + ' of ' + seats.max : '1 of ' + MAX_SEATS) + '. Add 3 more devices to see the seat limit enforced.';
+      next = 'seats'; em = 'Add 3 more devices';
+    }
+    el.guideStep.textContent = step;
+    el.guideText.textContent = '';
+    if (em) {
+      var idx = text.indexOf(em);
+      if (idx !== -1) {
+        el.guideText.appendChild(document.createTextNode(text.slice(0, idx)));
+        var strong = document.createElement('em');
+        strong.textContent = em;
+        el.guideText.appendChild(strong);
+        el.guideText.appendChild(document.createTextNode(text.slice(idx + em.length)));
+      } else {
+        el.guideText.textContent = text;
+      }
+    } else {
+      el.guideText.textContent = text;
+    }
+    for (var i = 0; i < el.buttons.length; i++) {
+      var b = el.buttons[i];
+      var hint = b.getAttribute('data-action') === next && !b.disabled;
+      b.classList.toggle('suggested', hint);
+      if (hint && el.edge && el.edge.contains(b)) el.edge.open = true;
     }
   }
 
@@ -205,22 +278,30 @@
 
   var actions = {
     trial: function () {
+      lastEvent = 'trial';
       log('ext', 'POST /trial {visitorId}');
       return routeTrial().then(function (key) {
         storedKey = key; storedToken = null;
         log('worker', '200 signed trial key, exp +' + TRIAL_DAYS + 'd', true);
         return actions.activate();
+      }, function () {
+        log('error', 'fetch failed: Worker unreachable — no trial without the Worker');
+        return refresh();
       });
     },
     buy: function (btn) {
+      lastEvent = 'buy';
       var plan = btn.getAttribute('data-plan-id') || 'lifetime';
       log('ext', 'POST /checkout {plan: "' + plan + '"} → Paddle overlay opens');
-      log('paddle', 'transaction.completed → POST /webhook (signature verified)');
       return routeWebhook(plan).then(function (res) {
+        log('paddle', 'transaction.completed → POST /webhook (signature verified)');
         storedKey = res.key; storedToken = null;
         log('worker', 'signed ' + plan + ' key for ' + res.sub + ', emailed via Resend', true);
         log('ext', 'GET /license?txn= → key received, stored');
         return actions.activate();
+      }, function () {
+        log('error', 'fetch failed: Worker unreachable — checkout cannot start');
+        return refresh();
       });
     },
     activate: function () {
@@ -251,6 +332,7 @@
       // Simulate two more installs of the same key, then a fourth that is refused.
       var subs = storedKey ? decodeJson(storedKey.split('.')[1]) : null;
       if (!subs || subs.plan === 'trial') { log('error', 'buy a plan first — trials do not use seats'); return Promise.resolve(); }
+      lastEvent = 'seats';
       var others = ['install_' + randomId(6), 'install_' + randomId(6), 'install_' + randomId(6)];
       var chain = Promise.resolve();
       others.forEach(function (id) {
@@ -267,6 +349,7 @@
     },
     tamper: function () {
       if (!storedToken) return Promise.resolve();
+      lastEvent = 'tamper';
       var parts = storedToken.split('.');
       var payload = decodeJson(parts[1]);
       payload.plan = 'lifetime';
@@ -280,13 +363,16 @@
       el.server.textContent = serverUp ? 'Worker: online' : 'Worker: down';
       el.server.classList.toggle('down', !serverUp);
       log(serverUp ? 'worker' : 'error', serverUp ? 'Worker back online' : 'Worker unreachable (simulated outage)');
-      if (!serverUp) log('ext', 'alarm: renew entitlement → fetch failed; verify() still passes offline → Pro stays on');
+      if (!serverUp && storedToken) log('ext', 'alarm: renew entitlement → fetch failed; verify() still passes offline → ' + (root.getAttribute('data-state') === 'pro' ? 'Pro' : 'trial') + ' stays on');
+      if (!serverUp && !storedToken) log('ext', 'no license stored — nothing to renew, popup stays Free');
+      if (serverUp && storedToken) { log('ext', 'alarm: renew entitlement'); return actions.activate(); }
       return refresh();
     },
     refund: function () {
       var source = storedToken || storedKey;
       if (!source) return Promise.resolve();
       var claims = decodeJson(source.split('.')[1]);
+      lastEvent = 'refund';
       log('paddle', 'transaction.refunded / subscription.canceled → POST /webhook');
       routeRefund(claims.sub);
       log('worker', 'status → cancelled, seats cleared for ' + claims.sub);
@@ -295,7 +381,8 @@
       return actions.activate();
     },
     reset: function () {
-      storedKey = null; storedToken = null; licenses = {}; serverUp = true;
+      storedKey = null; storedToken = null; licenses = {}; serverUp = true; lastEvent = 'start';
+      if (el.edge) el.edge.open = false;
       el.server.textContent = 'Worker: online';
       el.server.classList.remove('down');
       el.log.textContent = '';
