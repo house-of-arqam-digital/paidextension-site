@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; img-src 'self' data:; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Docs — PaidExtension</title>
+  <meta name="description" content="How PaidExtension works: repository layout, the one-hour setup path, licensing architecture, costs, and what the AI-agent skills do.">
+  <link rel="canonical" href="https://paidextension.dev/docs.html">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="assets/base.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/theme.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/"><img src="icon.png" alt="" width="32" height="32">PaidExtension</a>
+      <nav aria-label="Primary">
+        <a href="/#inside">What's inside</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="docs.html">Docs</a>
+        <a class="buy" href="https://polar.sh/paidextension" rel="noopener">Buy</a>
+        <button id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark mode"><span class="sun">&#9728;</span><span class="moon">&#9790;</span></button>
+      </nav>
+    </header>
+
+    <main class="doc narrow">
+      <h1>Documentation</h1>
+      <p class="updated">Overview of what ships in the kit. The full guides — <code>docs/setup.md</code>, <code>docs/licensing.md</code>, <code>docs/publishing.md</code> — are in the repository you receive after purchase.</p>
+
+      <h2 id="requirements">What you need</h2>
+      <ul>
+        <li>Node 22+ and a GitHub account.</li>
+        <li>A Cloudflare account (free tier is enough).</li>
+        <li>A Paddle account. Sandbox is free and instant; production needs Paddle's approval, typically 1–3 days — apply early.</li>
+        <li>A domain (optional for development, needed before you publish).</li>
+        <li>Optionally a Resend account to email license keys (free tier: 3,000 emails/month).</li>
+      </ul>
+
+      <h2 id="layout">Repository layout</h2>
+<pre><code>paidextension.config.json   single source of truth: product, company, URLs, plans, seats, trial, feature gates
+extension/                  MV3 extension (TypeScript, webpack, vitest)
+worker/                     licensing Worker (JS ESM + JSDoc, node:test, wrangler)
+site/docs/                  GitHub Pages root: landing, checkout, key, devices, privacy, terms, support
+scripts/                    init (rebrand), validate-config, generate-listing (+ tests)
+docs/                       setup, licensing, publishing guides
+.agents/skills/             agent skills: setup, publish, test
+.github/workflows/          ci.yml, pages.yml, release.yml</code></pre>
+
+      <h2 id="setup">The setup path (about an hour)</h2>
+      <ol>
+        <li><strong>Rebrand.</strong> <code>npm run init</code> asks for product name, company, support email, site URL, seats and trial days, then rewrites the config and every file mirroring it: manifests, <code>wrangler.toml</code>, the site's HTML and CSP, <code>CNAME</code>, tests. Non-interactive mode for agents: <code>npm run init -- --from answers.json</code>.</li>
+        <li><strong>Signing keypair.</strong> <code>cd worker &amp;&amp; npm run keygen -- --write</code> generates an ES256 keypair, writes the public half into the extension and prints the private half for the Worker secret. Production builds refuse to ship while the development key is still in place.</li>
+        <li><strong>Paddle.</strong> Create one product with monthly, yearly and one-time (lifetime) prices, a server API key, a client token and a webhook destination pointing at <code>/webhook</code>. The guide lists the exact seven events to subscribe to.</li>
+        <li><strong>Deploy the Worker.</strong> <code>wrangler kv namespace create</code>, four <code>wrangler secret put</code> calls, <code>npm run deploy</code>. <code>GET /health</code> reports which secrets and prices are configured.</li>
+        <li><strong>Email (optional).</strong> Verify a sending domain in Resend and set the API key. Without it buyers still get Pro — the extension polls for its key after checkout.</li>
+        <li><strong>Site.</strong> Enable GitHub Pages for <code>site/docs</code>, add a CNAME record, enforce HTTPS.</li>
+        <li><strong>Walk the golden path in sandbox.</strong> Trial → upgrade → Paddle overlay → test card → Pro within a minute → key in Settings → activate on a second profile → release a seat.</li>
+        <li><strong>Go live.</strong> Swap in production Paddle ids and tokens; <code>npm run build</code> refuses sandbox values. Then follow <code>docs/publishing.md</code> for the Chrome Web Store, Edge Add-ons and Firefox AMO.</li>
+      </ol>
+      <div class="callout"><p>Using an AI coding agent? Point it at <code>.agents/skills/setup/SKILL.md</code>. It walks the same steps and knows how to verify each one.</p></div>
+
+      <h2 id="licensing">Licensing architecture</h2>
+      <p>License keys are JWTs signed with ES256 (P-256). The private key lives only in Worker secrets; the public key ships in the extension, so a key verifies with no network call.</p>
+      <ul>
+        <li><strong>Plans:</strong> <code>monthly</code>, <code>yearly</code>, <code>lifetime</code>, <code>trial</code>. Subscriptions use the Paddle subscription id as subject; lifetime purchases use the transaction id. Unknown Paddle price ids fail closed.</li>
+        <li><strong>Entitlement tokens</strong> are short-lived (3 days by default), bound to the install id and renewed by an alarm, so a refund or cancellation reaches the device within days even though keys verify offline. Lifetime keys still use them, so lifetime purchases remain revocable.</li>
+        <li><strong>Seats:</strong> a key activates on up to <code>licensing.maxSeats</code> installs (default 3). <code>POST /seats</code> lists devices and <code>POST /deactivate</code> releases one or all; possession of the signed key is the credential.</li>
+        <li><strong>Trials:</strong> <code>POST /trial</code> issues a time-boxed key per visitor id with per-IP limits. <code>trialDays: 0</code> disables trials.</li>
+        <li><strong>Offline grace:</strong> if the Worker is unreachable, Pro stays on for <code>offlineGraceDays</code> past token expiry.</li>
+        <li><strong>Revocation:</strong> <code>subscription.canceled</code>, <code>past_due</code>, <code>paused</code>, refunds and chargebacks (<code>adjustment.*</code>) flip the stored status; the next token renewal fails and the extension drops to Free.</li>
+      </ul>
+
+      <h3>Worker routes</h3>
+<pre><code>GET  /health          configuration booleans, never secrets
+POST /checkout        {plan} → Paddle transaction id
+POST /trial           {visitorId} → trial key
+GET  /license?txn=    poll for the key after checkout
+GET  /status          license status for a key
+POST /activate        {key, installId} → entitlement token
+POST /deactivate      {key, installId} | {key, all: true}
+POST /seats           {key} → plan, status, expiry, devices
+POST /webhook         Paddle (signature-verified)
+POST /resend-webhook  Resend delivery events (Svix-verified)</code></pre>
+
+      <h2 id="costs">Costs</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Cloudflare Workers + KV</td><td>Free tier: 100k requests/day, 1k KV writes/day</td></tr>
+            <tr><td>GitHub Pages</td><td>Free</td></tr>
+            <tr><td>Paddle</td><td>5% + 50¢ per sale, no monthly fee; handles VAT/sales tax, invoices, refunds</td></tr>
+            <tr><td>Resend</td><td>Free tier: 3,000 emails/month</td></tr>
+            <tr><td>Domain</td><td>~$12/year</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="commands">Commands</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Where</th><th>Command</th><th>What</th></tr></thead>
+          <tbody>
+            <tr><td>root</td><td><code>npm run init</code></td><td>Rebrand from the sample product to yours</td></tr>
+            <tr><td>root</td><td><code>npm run validate:config</code></td><td>Config schema + cross-file consistency</td></tr>
+            <tr><td>root</td><td><code>npm run generate:listing</code></td><td>Store listing, permission justifications, data-use disclosure</td></tr>
+            <tr><td>root</td><td><code>npm run check</code></td><td>Everything below, in order</td></tr>
+            <tr><td>extension</td><td><code>npm run build</code> / <code>build:firefox</code> / <code>build:dev</code></td><td>Production, Firefox or dev bundle</td></tr>
+            <tr><td>extension</td><td><code>npm run package</code></td><td>Zips for store upload</td></tr>
+            <tr><td>worker</td><td><code>npm run keygen -- --write</code></td><td>New ES256 keypair</td></tr>
+            <tr><td>worker</td><td><code>npm run dev</code> / <code>deploy</code> / <code>tail</code></td><td>Wrangler</td></tr>
+            <tr><td>site</td><td><code>npm run check</code></td><td>ESLint, html-validate, link check, CSP check</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="skills">Agent skills</h2>
+      <ul>
+        <li><strong>setup</strong> — fresh clone to working paid extension: rebrand, keypair, Paddle sandbox, Worker deploy, Pages, golden-path verification.</li>
+        <li><strong>publish</strong> — bump version, run every check, build production packages, regenerate listing copy, tag a release, fill in the Chrome / Edge / Firefox dashboards.</li>
+        <li><strong>test</strong> — unit suites, build, load in Chrome, exercise trial / purchase / activation / seat limit / deactivate / offline grace / refund revocation against a local or deployed Worker.</li>
+      </ul>
+      <p><code>AGENTS.md</code> records the invariants: private keys only in Worker secrets, licensing code outside the service worker's hot path, strict per-page CSP on the site, unknown Paddle prices fail closed.</p>
+
+      <h2 id="support">Support</h2>
+      <p>Buyers get support through GitHub Issues on the private repository and by email at <a href="mailto:hello@paidextension.dev">hello@paidextension.dev</a>. Pre-sales questions are welcome at the same address.</p>
+    </main>
+
+    <footer>
+      <div>&copy; 2026 House of Arqam Ventures LLC</div>
+      <div>
+        <a href="/">Home</a>
+        <a href="license.html">License</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
