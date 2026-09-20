@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; img-src 'self' data:; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>PaidExtension — The $0/month stack for paid browser extensions</title>
   <meta name="description" content="Sell a Chrome, Edge or Firefox extension without servers, a database bill or tax filings. MV3 extension + Cloudflare Worker licensing + Paddle merchant of record + GitHub Pages site. Offline license keys, device seats, trials, refunds. One-time purchase.">
@@ -18,6 +18,12 @@
   <link rel="stylesheet" href="assets/base.css">
   <link rel="stylesheet" href="assets/site.css">
   <script src="assets/theme.js"></script>
+  <script src="assets/tabs.js" defer></script>
+  <script src="assets/demo.js" defer></script>
+  <script src="assets/configure.js" defer></script>
+  <script src="assets/calc.js" defer></script>
+  <script src="assets/pricing.js" defer></script>
+  <script src="assets/motion.js" defer></script>
 </head>
 <body>
   <div class="wrap">
@@ -27,6 +33,7 @@
         <a href="#inside">What's inside</a>
         <a href="#how">How it works</a>
         <a href="#compare">Compare</a>
+        <a href="#calc">Calculator</a>
         <a href="#pricing">Pricing</a>
         <a href="docs.html">Docs</a>
         <a class="buy" href="https://buy.polar.sh/polar_cl_JzfdrAYil4NxQALnNRLnURIT8Q30bQsixsOvQ3sq44I" rel="noopener">Buy</a>
@@ -36,17 +43,55 @@
 
     <main>
       <section class="hero">
-        <span class="eyebrow">Chrome &middot; Edge &middot; Firefox &middot; Manifest V3</span>
-        <h1>The <em>$0/month</em> stack for paid browser extensions.</h1>
-        <p class="lede">A complete, production-tested launch kit: MV3 extension with offline-verifiable licensing, a Cloudflare Worker that turns Paddle payments into signed license keys, and a static checkout site. No servers. No database bill. No sales-tax filings.</p>
-        <div class="cta-row">
-          <a class="cta" href="https://buy.polar.sh/polar_cl_JzfdrAYil4NxQALnNRLnURIT8Q30bQsixsOvQ3sq44I" rel="noopener">Get the kit — $99</a>
-          <a class="cta secondary" href="#inside">See what's inside</a>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Chrome &middot; Edge &middot; Firefox &middot; Manifest V3</span>
+            <h1>The <em>$0/month</em> stack for paid browser extensions.</h1>
+            <p class="lede">A complete, production-tested launch kit: MV3 extension with offline-verifiable licensing, a Cloudflare Worker that turns Paddle payments into signed license keys, and a static checkout site. No servers. No database bill. No sales-tax filings.</p>
+            <div class="cta-row">
+              <a class="cta" href="https://buy.polar.sh/polar_cl_JzfdrAYil4NxQALnNRLnURIT8Q30bQsixsOvQ3sq44I" rel="noopener">Get the kit — <span data-price-full="$149">$99</span></a>
+              <a class="cta secondary" href="#inside">See what's inside</a>
+            </div>
+            <p class="note">One-time purchase &middot; lifetime updates &middot; unlimited products &middot; 14-day refund</p>
+          </div>
+
+          <div class="hero-demo" id="demo" data-state="free">
+            <div class="popup" role="group" aria-label="Demo extension popup">
+              <div class="popup-bar">
+                <span class="popup-icon" aria-hidden="true"></span>
+                <span class="popup-title">Acme Extension</span>
+                <span class="demo-tier free" data-tier>Free</span>
+              </div>
+              <p class="popup-plan" data-plan>no license stored</p>
+              <ul class="features" aria-label="Feature gates">
+                <li data-feature="basicMode" class="on">Basic mode</li>
+                <li data-feature="advancedMode">Advanced mode</li>
+                <li data-feature="exportData">Export data</li>
+                <li data-feature="unlimitedItems">Unlimited items</li>
+              </ul>
+              <div class="popup-actions">
+                <button type="button" class="primary" data-action="trial" data-needs="free">Start 7-day trial</button>
+                <button type="button" class="primary" data-action="buy" data-plan-id="lifetime" data-needs="free">Buy lifetime (sandbox)</button>
+                <button type="button" data-action="seats" data-needs="key">Add 3 more devices</button>
+                <button type="button" data-action="tamper" data-needs="key">Tamper with token</button>
+                <button type="button" data-action="offline">Toggle Worker outage</button>
+                <button type="button" data-action="refund" data-needs="key">Refund</button>
+                <button type="button" data-action="reset">Reset</button>
+              </div>
+              <div class="popup-meta">
+                <span title="Stored key / entitlement token" data-key>&mdash;</span>
+                <span data-seats>&mdash;</span>
+                <span data-server>Worker: online</span>
+              </div>
+            </div>
+            <div class="demo-log" role="log" data-log aria-live="polite" aria-label="Licensing event log"></div>
+            <p class="demo-note">Live demo: real ES256 keys signed and verified in your browser with a keypair generated for this page. Nothing leaves the tab.</p>
+            <p class="demo-unsupported">Your browser doesn't support WebCrypto, so the live demo is off.</p>
+          </div>
         </div>
-        <p class="note">One-time purchase &middot; lifetime updates &middot; unlimited products &middot; 14-day refund</p>
       </section>
 
-      <pre class="terminal"><code><span class="comment"># from clone to a rebranded, fully tested paid extension</span>
+      <pre class="terminal" data-typing><code><span class="comment"># from clone to a rebranded, fully tested paid extension</span>
 git clone &lt;your copy&gt; my-extension &amp;&amp; cd my-extension
 npm run init          <span class="comment"># name, company, prices, seats, trial length</span>
 npm run install:all
@@ -83,67 +128,255 @@ npm run check         <span class="comment"># lint, types, 120+ tests, builds �
 
       <section id="inside">
         <h2>What's inside</h2>
-        <p class="sub">One private repository, five packages, one config file. Everything reads from <code>paidextension.config.json</code>.</p>
-        <div class="grid">
-          <div class="card">
-            <span class="tag">extension/</span>
-            <h3>TypeScript MV3 extension</h3>
-            <ul>
-              <li>Popup, settings, upgrade flow, sample content script</li>
-              <li><code>licensing/</code> module: offline key verification, device seats, trials, checkout polling, offline grace</li>
-              <li>Config-driven feature gates — <code>isEnabled('export')</code></li>
-              <li>Firefox manifest variant, Edge-ready packaging</li>
-              <li>Vitest suite, ESLint, strict TypeScript, webpack</li>
-            </ul>
+        <p class="sub">One private repository, five packages, one config file. Everything reads from <code>paidextension.config.json</code>. Real code, straight from the repo:</p>
+        <div class="explorer">
+          <div class="tabs" role="tablist" aria-label="Kit packages">
+            <button type="button" role="tab" id="tab-ext" aria-controls="panel-ext" aria-selected="true">extension/</button>
+            <button type="button" role="tab" id="tab-worker" aria-controls="panel-worker" aria-selected="false" tabindex="-1">worker/</button>
+            <button type="button" role="tab" id="tab-site" aria-controls="panel-site" aria-selected="false" tabindex="-1">site/</button>
+            <button type="button" role="tab" id="tab-scripts" aria-controls="panel-scripts" aria-selected="false" tabindex="-1">scripts/</button>
+            <button type="button" role="tab" id="tab-skills" aria-controls="panel-skills" aria-selected="false" tabindex="-1">.agents/skills/</button>
+            <button type="button" role="tab" id="tab-ci" aria-controls="panel-ci" aria-selected="false" tabindex="-1">.github/workflows/</button>
           </div>
-          <div class="card">
-            <span class="tag">worker/</span>
-            <h3>Cloudflare Worker licensing backend</h3>
-            <ul>
-              <li>Verifies Paddle webhooks, issues signed keys for monthly, yearly and <strong>lifetime</strong> plans</li>
-              <li>Seat registry in KV, short-lived install-bound entitlement tokens</li>
-              <li>Revokes on refund, chargeback and cancellation</li>
-              <li>Abuse-limited free trials, per-route rate limits</li>
-              <li>License-key emails via Resend, idempotent on retries</li>
-              <li>65 tests, no framework, deploys with <code>wrangler deploy</code></li>
-            </ul>
+
+          <div class="panel" role="tabpanel" id="panel-ext" aria-labelledby="tab-ext">
+            <div class="card">
+              <span class="tag">extension/</span>
+              <h3>TypeScript MV3 extension</h3>
+              <ul>
+                <li>Popup, settings, upgrade flow, sample content script</li>
+                <li><code>licensing/</code> module: offline key verification, device seats, trials, checkout polling, offline grace</li>
+                <li>Config-driven feature gates &mdash; <code>hasFeature('exportData')</code></li>
+                <li>Firefox manifest variant, Edge-ready packaging</li>
+                <li>Vitest suite, ESLint, strict TypeScript, webpack</li>
+              </ul>
+            </div>
+            <figure class="snippet">
+              <figcaption>extension/src/licensing/features.ts &middot; verify.ts</figcaption>
+              <pre data-lang="ts"><code>// Entitlement always derives from the signed license, never a stored flag.
+export async function isPro(): Promise&lt;boolean&gt; {
+  return (await getEntitlementStatus()).tier !== 'free';
+}
+
+/** True when the current entitlement includes `feature`. Unknown names are always false. */
+export async function hasFeature(feature: string): Promise&lt;boolean&gt; {
+  const { tier } = await getEntitlementStatus();
+  return featuresForTier(tier).has(feature);
+}
+
+// verify.ts — offline ES256 check with the embedded PUBLIC key
+const pubKey = await crypto.subtle.importKey('jwk', LICENSE_PUBLIC_JWK,
+  { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pubKey, signature, data);</code></pre>
+            </figure>
           </div>
-          <div class="card">
-            <span class="tag">site/</span>
-            <h3>Static checkout &amp; customer site</h3>
-            <ul>
-              <li>Landing, Paddle overlay checkout, license-key page, device management</li>
-              <li>Privacy, terms, support pages with refund policy</li>
-              <li>Strict per-page CSP, HTML validation, link and CSP checkers</li>
-              <li>Deploys to GitHub Pages on push</li>
-            </ul>
+
+          <div class="panel" role="tabpanel" id="panel-worker" aria-labelledby="tab-worker" hidden>
+            <div class="card">
+              <span class="tag">worker/</span>
+              <h3>Cloudflare Worker licensing backend</h3>
+              <ul>
+                <li>Verifies Paddle webhooks, issues signed keys for monthly, yearly and <strong>lifetime</strong> plans</li>
+                <li>Seat registry in KV, short-lived install-bound entitlement tokens</li>
+                <li>Revokes on refund, chargeback and cancellation</li>
+                <li>Abuse-limited free trials, per-route rate limits</li>
+                <li>License-key emails via Resend, idempotent on retries</li>
+                <li>65 tests, no framework, deploys with <code>wrangler deploy</code></li>
+              </ul>
+            </div>
+            <figure class="snippet">
+              <figcaption>worker/src/index.js &middot; POST /activate</figcaption>
+              <pre data-lang="js"><code>const claims = await verifyLicenseKey(body.key, env.LICENSE_PRIVATE_JWK);
+if (!claims) return json({ error: 'invalid_key' }, 400, cors);
+
+const status = await licenseStatus(claims.sub, env);
+// 'unknown' means we couldn't confirm either way (no KV record, Paddle
+// unreachable) — don't lock out a payer over our own outage.
+if (status === 'cancelled' || status === 'expired') {
+  return json({ error: 'subscription_inactive', status }, 403, cors);
+}
+
+const seats = await readSeats(claims.sub, env);
+const known = seats.installs.some((i) =&gt; i.id === installId);
+if (!known &amp;&amp; seats.installs.length &gt;= MAX_SEATS) {
+  return json({ error: 'seat_limit', seats: { used: seats.installs.length, max: MAX_SEATS } }, 409, cors);
+}
+const token = await signEntitlement(claims, installId, now + ENTITLEMENT_TTL_SECONDS, env);</code></pre>
+            </figure>
           </div>
-          <div class="card">
-            <span class="tag">scripts/</span>
-            <h3>Rebrand, validate, generate</h3>
-            <ul>
-              <li><code>npm run init</code> rewrites the entire repo for your product from a few answers</li>
-              <li><code>validate:config</code> keeps manifests, Worker and site consistent</li>
-              <li><code>generate:listing</code> drafts store copy, permission justifications and a privacy policy</li>
-            </ul>
+
+          <div class="panel" role="tabpanel" id="panel-site" aria-labelledby="tab-site" hidden>
+            <div class="card">
+              <span class="tag">site/</span>
+              <h3>Static checkout &amp; customer site</h3>
+              <ul>
+                <li>Landing, Paddle overlay checkout, license-key page, device management</li>
+                <li>Privacy, terms, support pages with refund policy</li>
+                <li>Strict per-page CSP, HTML validation, link and CSP checkers</li>
+                <li>Deploys to GitHub Pages on push</li>
+              </ul>
+            </div>
+            <figure class="snippet">
+              <figcaption>site/docs/checkout.js</figcaption>
+              <pre data-lang="js"><code>// The extension creates the Paddle transaction server-side (Worker /checkout)
+// and opens this page with ?txn=&lt;id&gt;&amp;env=&lt;production|sandbox&gt;. This page only
+// renders Paddle's overlay for that transaction.
+var config = window.SITE_CONFIG || {};
+var PINNED_TOKENS = config.paddleTokens || {};
+var TXN_PATTERN = /^txn_[a-z0-9]{1,64}$/;
+
+var params = new URLSearchParams(window.location.search);
+var txnId = params.get('txn');
+var env = params.get('env') || 'production';
+var token = Object.prototype.hasOwnProperty.call(PINNED_TOKENS, env) ? PINNED_TOKENS[env] : '';</code></pre>
+            </figure>
           </div>
-          <div class="card">
-            <span class="tag">.agents/skills/</span>
-            <h3>Agent-native</h3>
-            <ul>
-              <li>Step-by-step skills for Devin, Claude Code, Cursor and Codex: <strong>setup</strong>, <strong>publish</strong>, <strong>test</strong></li>
-              <li><code>AGENTS.md</code> with the invariants an agent must not break</li>
-              <li>Hand the repo to your agent: "rename to X, set prices, deploy, submit"</li>
-            </ul>
+
+          <div class="panel" role="tabpanel" id="panel-scripts" aria-labelledby="tab-scripts" hidden>
+            <div class="card">
+              <span class="tag">scripts/</span>
+              <h3>Rebrand, validate, generate</h3>
+              <ul>
+                <li><code>npm run init</code> rewrites the entire repo for your product from a few answers</li>
+                <li><code>validate:config</code> keeps manifests, Worker and site consistent</li>
+                <li><code>generate:listing</code> drafts store copy, permission justifications and a privacy policy</li>
+              </ul>
+            </div>
+            <figure class="snippet">
+              <figcaption>scripts/init.mjs &middot; non-interactive mode</figcaption>
+              <pre data-lang="sh"><code># Rebrand the kit from the sample "Acme Extension" to your product.
+#
+#   npm run init                          interactive
+#   npm run init -- --from answers.json   non-interactive (agents, CI)
+#   npm run init -- --dry-run             show what would change
+#
+# Rewrites paidextension.config.json, then replaces every occurrence of the
+# old product name, slug, company, emails and hostnames across the repo, so
+# manifests, wrangler.toml, the site's HTML/CSP, CNAME and tests all agree.
+
+cat &gt; answers.json &lt;&lt;'EOF'
+{ "product.name": "Tab Tamer", "company.name": "Tamer Labs LLC",
+  "urls.site": "https://tabtamer.app", "licensing.maxSeats": 3, "licensing.trialDays": 7 }
+EOF
+npm run init -- --from answers.json
+npm run validate:config &amp;&amp; npm test</code></pre>
+            </figure>
           </div>
-          <div class="card">
-            <span class="tag">.github/workflows/</span>
-            <h3>CI and releases</h3>
-            <ul>
-              <li>CI for every package on every PR</li>
-              <li>Tag-triggered release: version check, production build, store zips, GitHub release</li>
-              <li>Pages deploy for the site, Wrangler deploy for the Worker</li>
-            </ul>
+
+          <div class="panel" role="tabpanel" id="panel-skills" aria-labelledby="tab-skills" hidden>
+            <div class="card">
+              <span class="tag">.agents/skills/</span>
+              <h3>Agent-native</h3>
+              <ul>
+                <li>Step-by-step skills for Devin, Claude Code, Cursor and Codex: <strong>setup</strong>, <strong>publish</strong>, <strong>test</strong></li>
+                <li><code>AGENTS.md</code> with the invariants an agent must not break</li>
+                <li>Hand the repo to your agent: "rename to X, set prices, deploy, submit"</li>
+              </ul>
+            </div>
+            <figure class="snippet">
+              <figcaption>.agents/skills/setup/SKILL.md</figcaption>
+              <pre data-lang="md"><code>---
+name: setup
+description: Take a fresh clone of the PaidExtension kit to a working paid
+  extension — rebrand from config, generate the signing keypair, configure
+  Paddle sandbox, deploy the licensing Worker, publish the site to GitHub
+  Pages, and verify the trial → purchase → activate loop.
+---
+
+# Setup
+
+Goal: every step below verified, ending with a sandbox purchase that unlocks
+Pro in a loaded extension. Ask the user for the product facts up front (one
+message): product name, one-line description, company name, support email,
+site origin, seats per license, trial days. Everything else you can do or
+discover yourself.
+
+Never paste a secret into a file that is tracked by git. Secrets go through
+`wrangler secret put` (interactive) or `.dev.vars` (gitignored).
+
+## 1. Rebrand
+## 2. Signing keypair
+## 3. Paddle sandbox
+## 4. Deploy the Worker
+## 5. Site + domain
+## 6. Prove the loop</code></pre>
+            </figure>
+          </div>
+
+          <div class="panel" role="tabpanel" id="panel-ci" aria-labelledby="tab-ci" hidden>
+            <div class="card">
+              <span class="tag">.github/workflows/</span>
+              <h3>CI and releases</h3>
+              <ul>
+                <li>CI for every package on every PR</li>
+                <li>Tag-triggered release: version check, production build, store zips, GitHub release</li>
+                <li>Pages deploy for the site, Wrangler deploy for the Worker</li>
+              </ul>
+            </div>
+            <figure class="snippet">
+              <figcaption>.github/workflows/release.yml</figcaption>
+              <pre data-lang="yaml"><code># Tag-triggered packaging: the only build that runs with real payment config,
+# so the only one that proves the shippable bundle works.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    steps:
+      - name: Verify tag matches the configured version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(node -p "require('./paidextension.config.json').product.version")
+          [ "$tag" = "$version" ] || { echo "Version mismatch" &gt;&amp;2; exit 1; }
+      - run: npm run validate:config
+      - run: npm run lint &amp;&amp; npm run typecheck &amp;&amp; npm test
+        working-directory: extension
+      - name: Build with production payment config
+        working-directory: extension
+        run: npm run build &amp;&amp; npm run check:manifest &amp;&amp; npm run package</code></pre>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="configure">
+        <h2>Configure it in sixty seconds</h2>
+        <p class="sub">Answer a few questions and <code>npm run init</code> rewrites the whole repo. Try it: the config, manifest and popup below update as you type.</p>
+        <div class="configure">
+          <div class="configure-form" role="group" aria-label="Product answers">
+            <label>Product name <input type="text" name="name" value="Tab Tamer" maxlength="45"></label>
+            <label>Company <input type="text" name="company" value="Tamer Labs LLC" maxlength="60"></label>
+            <label>Site origin <input type="url" name="site" value="https://tabtamer.app" placeholder="https://" maxlength="80"></label>
+            <label>One-line description <input type="text" name="description" value="Tame your tabs: group, snooze and restore them in one click." maxlength="132"></label>
+            <label>Paid tier name <input type="text" name="pro" value="Pro" maxlength="16"></label>
+            <div class="row">
+              <label>Monthly $ <input type="number" name="monthly" value="3.99" min="0" step="0.01"></label>
+              <label>Yearly $ <input type="number" name="yearly" value="24.99" min="0" step="0.01"></label>
+              <label>Lifetime $ <input type="number" name="lifetime" value="59" min="0" step="1"></label>
+            </div>
+            <div class="row">
+              <label>Devices per license <input type="number" name="seats" value="3" min="1" max="10"></label>
+              <label>Trial days (0 = off) <input type="number" name="trial" value="7" min="0" max="30"></label>
+            </div>
+          </div>
+          <div class="configure-out">
+            <div class="tabs" role="tablist" aria-label="Generated output">
+              <button type="button" role="tab" id="tab-cfg" aria-controls="panel-cfg" aria-selected="true">paidextension.config.json</button>
+              <button type="button" role="tab" id="tab-manifest" aria-controls="panel-manifest" aria-selected="false" tabindex="-1">manifest.json</button>
+              <button type="button" role="tab" id="tab-popup" aria-controls="panel-popup" aria-selected="false" tabindex="-1">Popup</button>
+            </div>
+            <div role="tabpanel" id="panel-cfg" aria-labelledby="tab-cfg"><pre class="gen"><code data-out="config"></code></pre></div>
+            <div role="tabpanel" id="panel-manifest" aria-labelledby="tab-manifest" hidden><pre class="gen"><code data-out="manifest"></code></pre></div>
+            <div role="tabpanel" id="panel-popup" aria-labelledby="tab-popup" hidden>
+              <div class="popup preview" data-popup>
+                <div class="popup-bar"><span class="popup-icon" aria-hidden="true"></span><span class="popup-title" data-p="name">Tab Tamer</span><span class="demo-tier free">Free</span></div>
+                <p class="popup-plan" data-p="trial"></p>
+                <ul class="plan-list" data-p="plans"></ul>
+                <button type="button" class="p-cta" data-p="cta" disabled>Start free trial</button>
+                <p class="popup-foot"><span data-p="pro">Pro</span> unlocks advanced mode, export and unlimited items. <span data-p="company"></span></p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -183,7 +416,7 @@ npm run check         <span class="comment"># lint, types, 120+ tests, builds �
               </tr>
             </thead>
             <tbody>
-              <tr><td>Price</td><td class="us">$99 once (Solo)</td><td>$99–$499 once</td><td>3–5% of every sale, forever</td></tr>
+              <tr><td>Price</td><td class="us"><span data-price-full="$149">$99</span> once (Solo)</td><td>$99–$499 once</td><td>3–5% of every sale, forever</td></tr>
               <tr><td>Monthly infra at 0 customers</td><td class="us yes">$0</td><td class="no">Firebase / Supabase / hosting tiers</td><td class="yes">$0</td></tr>
               <tr><td>Sales tax / VAT handled</td><td class="us yes">Yes — Paddle MoR</td><td class="no">No — Stripe, you file</td><td class="no">No — Stripe, you file</td></tr>
               <tr><td>Works when backend is down</td><td class="us yes">Yes — offline ES256 keys</td><td class="no">No</td><td class="no">No</td></tr>
@@ -200,6 +433,47 @@ npm run check         <span class="comment"># lint, types, 120+ tests, builds �
         <p class="tiny">Competitor details as published on their sites at the time of writing; check current terms before deciding.</p>
       </section>
 
+      <section id="calc">
+        <h2>What you keep, per month</h2>
+        <p class="sub">Drag the sliders. Every rate is editable, so plug in a vendor's current pricing if it has changed.</p>
+        <div class="calc">
+          <div class="calc-form" role="group" aria-label="Calculator inputs">
+            <label>Price per sale <b data-out="priceEcho">$29</b><input type="range" data-input="price" min="1" max="199" step="1" value="29"></label>
+            <label>Sales per month <b data-out="salesEcho">40</b><input type="range" data-input="sales" min="0" max="1000" step="5" value="40"></label>
+            <label>Active installs <b data-out="usersEcho">2k</b><input type="range" data-input="users" min="0" max="200000" step="500" value="2000"></label>
+            <p class="tiny left" data-out="freeTier"></p>
+            <details class="assumptions">
+              <summary>Assumptions</summary>
+              <label>Hosted SDK cut (% of each sale) <input type="number" data-input="sdkRate" value="5" min="0" max="30" step="0.5"></label>
+              <label>DIY backend hosting ($/month) <input type="number" data-input="hosting" value="25" min="0" step="1"></label>
+              <label>Tax calculation tool (% of revenue) <input type="number" data-input="taxRate" value="0.5" min="0" max="5" step="0.1"></label>
+              <label>Tax registrations &amp; filings ($/month) <input type="number" data-input="tax" value="40" min="0" step="1"></label>
+              <p class="tiny left">Illustrative estimates from published rates at the time of writing: Paddle 5% + 50¢ per sale (tax handled); Stripe 2.9% + 30¢; Stripe Tax 0.5% per transaction; Cloudflare Workers free tier 100k requests/day, then $5/month. Vendor pricing changes — edit any number above.</p>
+            </details>
+          </div>
+          <div class="calc-out">
+            <p class="gross">Gross revenue <b data-out="gross">$0</b></p>
+            <div class="stack-row us">
+              <div class="stack-head"><b>PaidExtension</b><span>Paddle MoR + Cloudflare free tier</span></div>
+              <div class="bar"><i data-out="usBar"></i></div>
+              <dl><dt>Payment fees</dt><dd data-out="usFees">$0</dd><dt>Infrastructure</dt><dd data-out="usInfra">$0</dd><dt>Tax compliance</dt><dd>Included</dd><dt>You keep</dt><dd class="keep" data-out="usKeep">$0</dd></dl>
+            </div>
+            <div class="stack-row">
+              <div class="stack-head"><b>Hosted payments SDK</b><span>their cut + Stripe, you file tax</span></div>
+              <div class="bar"><i data-out="sdkBar"></i></div>
+              <dl><dt>Payment fees</dt><dd data-out="sdkFees">$0</dd><dt>Infrastructure</dt><dd>$0</dd><dt>Tax compliance</dt><dd data-out="sdkTax">$0</dd><dt>You keep</dt><dd class="keep" data-out="sdkKeep">$0</dd></dl>
+            </div>
+            <div class="stack-row">
+              <div class="stack-head"><b>DIY: Stripe + Firebase/Supabase</b><span>hosting bill + tax tooling</span></div>
+              <div class="bar"><i data-out="diyBar"></i></div>
+              <dl><dt>Payment fees</dt><dd data-out="diyFees">$0</dd><dt>Infrastructure</dt><dd data-out="diyInfra">$0</dd><dt>Tax compliance</dt><dd data-out="diyTax">$0</dd><dt>You keep</dt><dd class="keep" data-out="diyKeep">$0</dd></dl>
+            </div>
+            <p class="delta" data-out="delta"></p>
+            <p class="tiny" data-out="taxNote"></p>
+          </div>
+        </div>
+      </section>
+
       <section id="pricing">
         <h2>Pricing</h2>
         <p class="sub">Pay once. Build as many extensions as you like. Same repo, same updates — the tier sets how many developers may use it.</p>
@@ -207,8 +481,9 @@ npm run check         <span class="comment"># lint, types, 120+ tests, builds �
           <div class="card plan">
             <span class="badge">Launch price</span>
             <h3>Solo</h3>
-            <p class="price"><s>$149</s>$99</p>
+            <p class="price"><s>$149</s><span data-price-full="$149">$99</span></p>
             <p class="period">one-time, one developer</p>
+            <p class="launch">$50 off for the first 100 customers &mdash; <b><span data-launch-left>100</span> left</b></p>
             <ul>
               <li>Private GitHub repo access, instantly</li>
               <li>Unlimited end products, commercial use</li>
