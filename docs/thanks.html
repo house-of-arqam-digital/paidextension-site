@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; img-src 'self' data:; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Thanks — PaidExtension</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="assets/base.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/theme.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/"><img src="icon.png" alt="" width="32" height="32">PaidExtension</a>
+      <nav aria-label="Primary">
+        <a href="/#inside">What's inside</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="docs.html">Docs</a>
+        <button id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark mode"><span class="sun">&#9728;</span><span class="moon">&#9790;</span></button>
+      </nav>
+    </header>
+
+    <main class="doc narrow">
+      <h1>Thanks — you're in.</h1>
+      <p class="lede">Your receipt is on its way from Polar. Here is what happens next.</p>
+
+      <h2>1. Get repository access</h2>
+      <p>Polar grants access to the private <code>house-of-arqam-digital/paidextension</code> repository to the GitHub account you connect. If you didn't connect one during checkout, open your Polar purchase page (linked in the receipt email), find the <strong>GitHub repository access</strong> benefit and connect GitHub there. The invitation arrives at your GitHub email within a minute; accept it and the repo appears under your account.</p>
+
+      <h2>2. Clone and run the setup</h2>
+      <pre class="terminal"><code>git clone https://github.com/house-of-arqam-digital/paidextension.git my-extension
+cd my-extension
+npm run init          <span class="comment"># product name, company, prices, seats, trial length</span>
+npm run install:all
+npm run check         <span class="comment"># lint, types, tests, builds</span></code></pre>
+      <p>Then follow <code>docs/setup.md</code> in the repo — or hand the <code>.agents/skills/setup</code> skill to your AI coding agent. The <a href="docs.html">online docs</a> summarize the same path.</p>
+
+      <h2>3. Updates</h2>
+      <p>Updates are pushed to the same repository; pull whenever you like. Star or watch it on GitHub to get notified.</p>
+
+      <h2>Help</h2>
+      <p>Questions or problems: open an issue in the repository, or email <a href="mailto:hello@paidextension.dev">hello@paidextension.dev</a>. Refunds within 14 days are handled the same way — see the <a href="terms.html#refunds">terms</a>.</p>
+    </main>
+
+    <footer>
+      <div>&copy; 2026 House of Arqam Ventures LLC</div>
+      <div>
+        <a href="/">Home</a>
+        <a href="docs.html">Docs</a>
+        <a href="license.html">License</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
