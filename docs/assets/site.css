@@ -167,6 +167,14 @@ th.us { color: var(--accent); }
 .popup-actions button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .popup-actions button.primary:hover:not(:disabled) { background: var(--accent-d); }
 .popup-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+.popup-actions button.suggested:not(:disabled) { box-shadow: 0 0 0 2px light-dark(#fff, #181B25), 0 0 0 4px var(--accent); }
+.demo-guide { display: grid; gap: 3px; margin: 10px 0 8px; padding: 10px 12px; border-radius: 10px; background: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05)); border-left: 3px solid var(--accent); font-size: 12.5px; line-height: 1.45; text-align: left; }
+.demo-guide b { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); }
+.demo-guide em { font-style: normal; font-weight: 700; }
+.popup-edge { margin-top: 8px; }
+.popup-edge summary { font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; padding: 4px 0; list-style-position: inside; }
+.popup-edge summary:hover { color: var(--ink); }
+.popup-edge[open] summary { margin-bottom: 6px; }
 .popup-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 10px; font-size: 11.5px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .popup-meta [data-server].down { color: light-dark(#B91C1C, #FCA5A5); font-weight: 700; }
 .demo-log {
@@ -183,7 +191,7 @@ th.us { color: var(--accent); }
 @keyframes demo-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .demo-note, .demo-unsupported { font-size: 12px; color: var(--muted); margin: 0; text-align: left; }
 .demo-unsupported { display: none; }
-.hero-demo.unsupported .popup, .hero-demo.unsupported .demo-log, .hero-demo.unsupported .demo-note { display: none; }
+.hero-demo.unsupported .popup, .hero-demo.unsupported .demo-log, .hero-demo.unsupported .demo-note, .hero-demo.unsupported .demo-guide { display: none; }
 .hero-demo.unsupported .demo-unsupported { display: block; }
 
 /* Tabs (code explorer + config preview) */
