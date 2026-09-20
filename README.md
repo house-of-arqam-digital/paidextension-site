@@ -8,6 +8,7 @@ by GitHub Pages; the kit itself lives in the private `paidextension` repo.
 npm ci
 npm run check   # eslint, html-validate, local link check, CSP check
 npm run serve   # http://localhost:8898
+npm run og      # re-render docs/og.png from scripts/og-card.html (needs a local Chrome)
 ```
 
 - `docs/CNAME` pins the custom domain; `paidextension.com` redirects here at the Cloudflare edge.
