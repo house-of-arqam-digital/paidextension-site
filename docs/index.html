@@ -103,7 +103,7 @@
 
       <div class="stats">
         <div class="stat"><b>$0</b><span>monthly infrastructure until you have customers</span></div>
-        <div class="stat"><b>0</b><span>tax returns you file — Paddle is the merchant of record</span></div>
+        <div class="stat"><b>0</b><span>sales-tax or VAT returns you file — Paddle is the merchant of record</span></div>
         <div class="stat"><b>~1 hour</b><span>from clone to sandbox purchase, following the setup guide</span></div>
         <div class="stat"><b>3</b><span>browsers from one codebase: Chrome, Edge, Firefox</span></div>
       </div>
@@ -115,12 +115,12 @@
           <div class="card">
             <span class="tag">Cost</span>
             <h3>$0/month, honestly</h3>
-            <p>GitHub Pages hosts the site. Cloudflare Workers + KV run licensing on the free tier (100k requests/day — tens of thousands of users). Paddle only takes a cut of sales. Your fixed cost is a domain.</p>
+            <p>GitHub Pages hosts the site. Cloudflare Workers + KV run licensing on the free tier, which covers a launch; once you have a steady base of paying users, Workers Paid is $5/month. Paddle only takes a cut of sales. Your fixed cost is a domain.</p>
           </div>
           <div class="card">
             <span class="tag">Tax</span>
             <h3>Merchant of record built in</h3>
-            <p>Paddle sells to your customer, collects VAT/GST/sales tax worldwide, issues invoices and handles refunds and chargebacks. The kit turns Paddle webhooks into license keys — you never touch a tax form.</p>
+            <p>Paddle sells to your customer, collects VAT/GST/sales tax worldwide, issues invoices and handles refunds and chargebacks. The kit turns Paddle webhooks into license keys — you never register for or file sales tax or VAT. (Income tax on what you earn is still yours.)</p>
           </div>
           <div class="card">
             <span class="tag">Reliability</span>
@@ -351,7 +351,7 @@ steps:
         <div class="your-numbers" role="group" aria-label="Your numbers">
           <label>Price per sale <b data-out="priceEcho">$29</b><input type="range" data-input="price" min="1" max="199" step="1" value="29"></label>
           <label>Sales per month <b data-out="salesEcho">40</b><input type="range" data-input="sales" min="0" max="1000" step="5" value="40"></label>
-          <label>Active installs <b data-out="usersEcho">2k</b><input type="range" data-input="users" min="0" max="200000" step="500" value="2000"></label>
+          <label>Paid + trial installs <b data-out="usersEcho">2k</b><input type="range" data-input="users" min="0" max="200000" step="500" value="2000"></label>
         </div>
         <div class="table-wrap">
           <table>
